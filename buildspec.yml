@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      # Install AWS CLI if not pre-installed
+      - yum install -y aws-cli
+
+  pre_build:
+    commands:
+      - echo Preparing the build environment...
+      - aws --version  # Check AWS CLI version
+      - echo Cleaning up previous builds...
+      - rm -rf dist  # Remove any previous build artifacts
+
+  build:
+    commands:
+      - echo Starting the build process...
+      - mkdir dist
+      - cp -R src/* dist/  # Copy source files to the distribution folder
+
+  post_build:
+    commands:
+      - echo Deploying files to S3 bucket...
+      - aws s3 sync dist/ s3://dem0-1 --delete
+      - echo Build and deployment complete!
+
+artifacts:
+  files:
+    - '**/*'  # Include all files for debugging purposes
+  base-directory: dist  # Specify the build output directory
